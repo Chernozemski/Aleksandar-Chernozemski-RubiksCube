@@ -1,0 +1,17 @@
+$tile-size: 52px;
+$tile-gap: 2px;
+$face-size: $tile-size * 3 + $tile-gap * 2;
+
+.face-grid {
+  display: grid;
+  grid-template-columns: repeat(3, $tile-size);
+  grid-template-rows: repeat(3, $tile-size);
+  gap: $tile-gap;
+  width: $face-size;
+  height: $face-size;
+}
+
+.face-grid__cell {
+  border: 2px solid black;
+  transition: background-color 0.2s ease;
+}

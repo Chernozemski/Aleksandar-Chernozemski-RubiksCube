@@ -1,0 +1,14 @@
+.rotation-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.rotation-buttons .MuiButtonGroup-root .MuiButton-root {
+  width: 52px;
+  min-width: 52px;
+  padding: 10px;
+  font-size: 1.1rem;
+}

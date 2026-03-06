@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/RubiksCube.Api/RubiksCube.Api.csproj" />
+  <Project Path="src/RubiksCube.Web/rubikscube.web.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="tests/RubiksCube.Api.Tests/RubiksCube.Api.Tests.csproj" />
+</Solution>
