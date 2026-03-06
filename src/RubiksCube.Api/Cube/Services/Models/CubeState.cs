@@ -2,7 +2,7 @@ namespace RubiksCube.Api.Cube.Services.Models;
 
 public class CubeState
 {
-	public char[] Up { get; set; } = [];
+	public required char[] Up { get; set; }
 	public required char[] Down { get; set; }
 	public required char[] Left { get; set; }
 	public required char[] Right { get; set; }

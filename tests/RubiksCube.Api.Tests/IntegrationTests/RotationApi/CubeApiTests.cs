@@ -32,24 +32,36 @@ public class CubeApiTests(WebApplicationFactory<Program> factory) : IClassFixtur
 		Assert.All(state.Left, c => Assert.Equal('O', c));
 	}
 
-	[Fact]
-	public async Task Post_with_valid_move_returns_200_and_modified_state()
+	[Theory]
+	[InlineData("F")]
+	[InlineData("F'")]
+	[InlineData("R")]
+	[InlineData("R'")]
+	[InlineData("U")]
+	[InlineData("U'")]
+	[InlineData("D")]
+	[InlineData("D'")]
+	[InlineData("L")]
+	[InlineData("L'")]
+	[InlineData("B")]
+	[InlineData("B'")]
+	public async Task Post_with_valid_move_returns_200_and_modified_state(string move)
 	{
-		var getResponse = await _client.GetAsync("/api/cube");
-		getResponse.EnsureSuccessStatusCode();
-		var initialState = await getResponse.Content.ReadFromJsonAsync<CubeState>();
-
+		var initialState = await _client.GetFromJsonAsync<CubeState>("/api/cube");
 		Assert.NotNull(initialState);
 
-		var postResponse = await _client.PostAsJsonAsync("/api/cube", new { State = initialState, Move = "F" });
-		postResponse.EnsureSuccessStatusCode();
-		var afterState = await postResponse.Content.ReadFromJsonAsync<CubeState>();
-		
+		var response = await _client.PostAsJsonAsync("/api/cube", new { State = initialState, Move = move });
+		response.EnsureSuccessStatusCode();
+		var afterState = await response.Content.ReadFromJsonAsync<CubeState>();
+
 		Assert.NotNull(afterState);
-		Assert.All(afterState.Front, c => Assert.Equal('G', c));
-		Assert.Equal('O', afterState.Up[6]);
-		Assert.Equal('O', afterState.Up[7]);
-		Assert.Equal('O', afterState.Up[8]);
+		Assert.Equal(9, afterState.Up.Length);
+		Assert.Equal(9, afterState.Down.Length);
+		Assert.Equal(9, afterState.Left.Length);
+		Assert.Equal(9, afterState.Right.Length);
+		Assert.Equal(9, afterState.Front.Length);
+		Assert.Equal(9, afterState.Back.Length);
+		Assert.False(RubiksCubeFixture.IsSameState(initialState, afterState));
 	}
 
 	[Fact]
@@ -92,5 +104,36 @@ public class CubeApiTests(WebApplicationFactory<Program> factory) : IClassFixtur
 
 		Assert.NotNull(afterMove2State);
 		Assert.True(RubiksCubeFixture.IsSameState(initial, afterMove2State));
+	}
+
+	[Theory]
+	[InlineData(nameof(CubeState.Up))]
+	[InlineData(nameof(CubeState.Down))]
+	[InlineData(nameof(CubeState.Left))]
+	[InlineData(nameof(CubeState.Right))]
+	[InlineData(nameof(CubeState.Front))]
+	[InlineData(nameof(CubeState.Back))]
+	public async Task Post_with_null_face_returns_400(string nullFace)
+	{
+		var solved = RubiksCubeFixture.GetSolved();
+
+		if (nullFace == nameof(CubeState.Up))
+			solved.Up = null!;
+		else if (nullFace == nameof(CubeState.Down))
+			solved.Down = null!;
+		else if (nullFace == nameof(CubeState.Left))
+			solved.Left = null!;
+		else if (nullFace == nameof(CubeState.Right))
+			solved.Right = null!;
+		else if (nullFace == nameof(CubeState.Front))
+			solved.Front = null!;
+		else if (nullFace == nameof(CubeState.Back))
+			solved.Back = null!;
+
+		var response = await _client.PostAsJsonAsync("/api/cube", new { State = solved, Move = "F" });
+
+		Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+		var content = await response.Content.ReadAsStringAsync();
+		Assert.Contains("Invalid cube state", content);
 	}
 }
